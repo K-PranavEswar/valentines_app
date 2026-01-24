@@ -30,12 +30,10 @@ const moods = ["Secret", "Love", "Crush", "Regret", "Funny"];
 
 export default function PostConfession() {
   const navigate = useNavigate();
-  // Removed fromName and toName states
   const [message, setMessage] = useState("");
   const [mood, setMood] = useState("Secret");
   const [loading, setLoading] = useState(false);
 
-  // Logic to close submissions after Valentine's
   const closed = new Date() >= new Date("2026-02-15T00:00:00.000Z");
 
   const submit = async (e) => {
@@ -47,7 +45,6 @@ export default function PostConfession() {
 
     try {
       await api.post("/api/confessions", {
-        // No From/To names sent anymore
         message: message.trim(),
         mood
       });
@@ -57,6 +54,10 @@ export default function PostConfession() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const goBack = () => {
+    navigate("/");
   };
 
   return (
@@ -79,7 +80,7 @@ export default function PostConfession() {
           flex: 1,
           display: "flex",
           justifyContent: "center",
-          padding: "clamp(20px, 5vw, 40px)" 
+          padding: "clamp(20px, 5vw, 40px)"
         }}
       >
         <div
@@ -95,38 +96,29 @@ export default function PostConfession() {
             boxShadow: "0 10px 40px rgba(0,0,0,0.3)"
           }}
         >
-          {/* --- NEW BACK BUTTON SECTION --- */}
-          <button
-            onClick={() => navigate("/")}
-            style={{
-              background: "transparent",
-              border: "none",
-              color: "rgba(255, 255, 255, 0.6)",
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-              fontSize: "0.9rem",
-              padding: 0,
-              marginBottom: "10px",
-              transition: "all 0.2s"
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.color = "#ff4d6d";
-              e.currentTarget.style.transform = "translateX(-4px)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.color = "rgba(255, 255, 255, 0.6)";
-              e.currentTarget.style.transform = "translateX(0)";
-            }}
-          >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M19 12H5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              <path d="M12 19L5 12L12 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-            Back to Home
-          </button>
-          {/* ------------------------------- */}
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, marginBottom: 18 }}>
+            <button
+              onClick={goBack}
+              style={{
+                border: 0,
+                padding: "10px 14px",
+                borderRadius: 50,
+                background: "rgba(255,255,255,0.10)",
+                color: "#fff0f3",
+                fontWeight: 800,
+                cursor: "pointer",
+                transition: "all 0.2s"
+              }}
+              onMouseDown={(e) => (e.target.style.transform = "scale(0.98)")}
+              onMouseUp={(e) => (e.target.style.transform = "scale(1)")}
+            >
+              ← Back
+            </button>
+
+            <div style={{ fontSize: "0.85rem", opacity: 0.7, fontWeight: 700 }}>
+              Home
+            </div>
+          </div>
 
           <div style={{ textAlign: "center", marginBottom: 24 }}>
             <h2
@@ -141,6 +133,7 @@ export default function PostConfession() {
             >
               Post a Confession
             </h2>
+
             <div style={{ marginTop: 8, opacity: 0.7, fontSize: "0.9rem" }}>
               Dated: <b>14/02/2026</b> • Anonymous Confessions 🤫
             </div>
@@ -164,8 +157,6 @@ export default function PostConfession() {
           </div>
 
           <form onSubmit={submit} style={{ display: "grid", gap: 16, opacity: closed ? 0.55 : 1 }}>
-            
-            {/* VIBE Select */}
             <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
               <label style={{ fontSize: "0.85rem", fontWeight: 700, marginLeft: 10, opacity: 0.9 }}>VIBE</label>
               <select
@@ -190,7 +181,6 @@ export default function PostConfession() {
               </select>
             </div>
 
-            {/* MESSAGE Input */}
             <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
               <label style={{ fontSize: "0.85rem", fontWeight: 700, marginLeft: 10, opacity: 0.9 }}>CONFESSION</label>
               <div style={{ position: "relative" }}>
