@@ -95,6 +95,39 @@ export default function PostConfession() {
             boxShadow: "0 10px 40px rgba(0,0,0,0.3)"
           }}
         >
+          {/* --- NEW BACK BUTTON SECTION --- */}
+          <button
+            onClick={() => navigate("/")}
+            style={{
+              background: "transparent",
+              border: "none",
+              color: "rgba(255, 255, 255, 0.6)",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+              fontSize: "0.9rem",
+              padding: 0,
+              marginBottom: "10px",
+              transition: "all 0.2s"
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.color = "#ff4d6d";
+              e.currentTarget.style.transform = "translateX(-4px)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.color = "rgba(255, 255, 255, 0.6)";
+              e.currentTarget.style.transform = "translateX(0)";
+            }}
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M19 12H5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M12 19L5 12L12 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+            Back to Home
+          </button>
+          {/* ------------------------------- */}
+
           <div style={{ textAlign: "center", marginBottom: 24 }}>
             <h2
               style={{
