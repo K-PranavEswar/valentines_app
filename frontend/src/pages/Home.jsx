@@ -7,7 +7,18 @@ import api from "../api/axios.js";
 const FloatingHearts = () => {
   const hearts = useMemo(() => Array.from({ length: 12 }), []);
   return (
-    <div style={{ position: "fixed", top: 0, left: 0, width: "100%", height: "100%", overflow: "hidden", zIndex: -1, pointerEvents: "none" }}>
+    <div
+      style={{
+        position: "fixed",
+        top: 0,
+        left: 0,
+        width: "100%",
+        height: "100%",
+        overflow: "hidden",
+        zIndex: -1,
+        pointerEvents: "none"
+      }}
+    >
       {hearts.map((_, i) => (
         <div
           key={i}
@@ -101,7 +112,11 @@ export default function Home() {
     <div
       style={{
         minHeight: "100vh",
-        background: "linear-gradient(135deg, #2a0a18 0%, #590d22 100%)",
+        backgroundImage: `linear-gradient(rgba(10,0,8,0.75), rgba(40,0,20,0.85)), url("/background.jpg")`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
+        backgroundAttachment: "fixed",
         color: "#fff0f3",
         fontFamily: "'Inter', sans-serif",
         overflowX: "hidden",
@@ -157,7 +172,11 @@ export default function Home() {
             }}
           >
             Speak your heart out anonymously. <br />
-            Special Edition <span style={{ color: "#ff4d6d", fontWeight: "bold" }}>14/02/2026</span> 🌹
+            Special Edition{" "}
+            <span style={{ color: "#ff4d6d", fontWeight: "bold" }}>
+              14/02/2026
+            </span>{" "}
+            🌹
           </p>
 
           {closed && (
@@ -203,13 +222,23 @@ export default function Home() {
               }}
             >
               {moods.map((m) => (
-                <option key={m.value} value={m.value} style={{ background: "#2a0a18" }}>
+                <option
+                  key={m.value}
+                  value={m.value}
+                  style={{ background: "#2a0a18" }}
+                >
                   {m.label}
                 </option>
               ))}
             </select>
 
-            <div style={{ position: "relative", flex: "999 1 300px", maxWidth: "100%" }}>
+            <div
+              style={{
+                position: "relative",
+                flex: "999 1 300px",
+                maxWidth: "100%"
+              }}
+            >
               <input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
@@ -225,8 +254,12 @@ export default function Home() {
                   outline: "none",
                   transition: "all 0.2s"
                 }}
-                onFocus={(e) => (e.target.style.background = "rgba(255,255,255,0.15)")}
-                onBlur={(e) => (e.target.style.background = "rgba(255,255,255,0.1)")}
+                onFocus={(e) =>
+                  (e.target.style.background = "rgba(255,255,255,0.15)")
+                }
+                onBlur={(e) =>
+                  (e.target.style.background = "rgba(255,255,255,0.1)")
+                }
               />
             </div>
           </div>
@@ -275,7 +308,11 @@ export default function Home() {
         © Confession Site 2026
       </footer>
 
-      <ConfessionModal open={open} confession={selected} onClose={() => setOpen(false)} />
+      <ConfessionModal
+        open={open}
+        confession={selected}
+        onClose={() => setOpen(false)}
+      />
     </div>
   );
 }

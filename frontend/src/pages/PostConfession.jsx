@@ -6,7 +6,18 @@ import api from "../api/axios.js";
 const FloatingHearts = () => {
   const hearts = useMemo(() => Array.from({ length: 12 }), []);
   return (
-    <div style={{ position: "fixed", top: 0, left: 0, width: "100%", height: "100%", overflow: "hidden", zIndex: -1, pointerEvents: "none" }}>
+    <div
+      style={{
+        position: "fixed",
+        top: 0,
+        left: 0,
+        width: "100%",
+        height: "100%",
+        overflow: "hidden",
+        zIndex: -1,
+        pointerEvents: "none"
+      }}
+    >
       {hearts.map((_, i) => (
         <div
           key={i}
@@ -30,8 +41,7 @@ const moods = ["Secret", "Love", "Crush", "Regret", "Funny"];
 
 export default function PostConfession() {
   const navigate = useNavigate();
-  
-  // Added new state for Name and Department
+
   const [name, setName] = useState("");
   const [department, setDepartment] = useState("");
   const [message, setMessage] = useState("");
@@ -49,8 +59,8 @@ export default function PostConfession() {
 
     try {
       await api.post("/api/confessions", {
-        name: name.trim(),        // Sending Name
-        department: department.trim(), // Sending Dept
+        name: name.trim(),
+        department: department.trim(),
         message: message.trim(),
         mood
       });
@@ -66,13 +76,12 @@ export default function PostConfession() {
     navigate("/");
   };
 
-  // Common Input Style Object to keep code clean
   const inputStyle = {
     width: "100%",
     padding: "12px 16px",
     borderRadius: 50,
     border: "1px solid rgba(255,255,255,0.15)",
-    background: "rgba(0,0,0,0.2)",
+    background: "rgba(0,0,0,0.25)",
     color: "white",
     outline: "none",
     fontFamily: "inherit",
@@ -83,7 +92,11 @@ export default function PostConfession() {
     <div
       style={{
         minHeight: "100vh",
-        background: "linear-gradient(135deg, #2a0a18 0%, #590d22 100%)",
+        backgroundImage: `linear-gradient(rgba(10,0,8,0.75), rgba(40,0,20,0.85)), url("/background.jpg")`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
+        backgroundAttachment: "fixed",
         color: "#fff0f3",
         fontFamily: "'Inter', sans-serif",
         display: "flex",
@@ -109,13 +122,21 @@ export default function PostConfession() {
             height: "fit-content",
             padding: "30px",
             borderRadius: 24,
-            background: "rgba(255, 255, 255, 0.05)",
-            backdropFilter: "blur(12px)",
+            background: "rgba(255, 255, 255, 0.06)",
+            backdropFilter: "blur(14px)",
             border: "1px solid rgba(255, 255, 255, 0.1)",
             boxShadow: "0 10px 40px rgba(0,0,0,0.3)"
           }}
         >
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, marginBottom: 18 }}>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              gap: 12,
+              marginBottom: 18
+            }}
+          >
             <button
               onClick={goBack}
               style={{
@@ -175,11 +196,21 @@ export default function PostConfession() {
             )}
           </div>
 
-          <form onSubmit={submit} style={{ display: "grid", gap: 16, opacity: closed ? 0.55 : 1 }}>
-            
-            {/* --- NAME FIELD --- */}
+          <form
+            onSubmit={submit}
+            style={{ display: "grid", gap: 16, opacity: closed ? 0.55 : 1 }}
+          >
             <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-              <label style={{ fontSize: "0.85rem", fontWeight: 700, marginLeft: 10, opacity: 0.9 }}>NAME (TO)</label>
+              <label
+                style={{
+                  fontSize: "0.85rem",
+                  fontWeight: 700,
+                  marginLeft: 10,
+                  opacity: 0.9
+                }}
+              >
+                NAME (TO)
+              </label>
               <input
                 type="text"
                 value={name}
@@ -190,9 +221,17 @@ export default function PostConfession() {
               />
             </div>
 
-            {/* --- DEPARTMENT FIELD --- */}
             <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-              <label style={{ fontSize: "0.85rem", fontWeight: 700, marginLeft: 10, opacity: 0.9 }}>DEPARTMENT</label>
+              <label
+                style={{
+                  fontSize: "0.85rem",
+                  fontWeight: 700,
+                  marginLeft: 10,
+                  opacity: 0.9
+                }}
+              >
+                DEPARTMENT
+              </label>
               <input
                 type="text"
                 value={department}
@@ -203,9 +242,17 @@ export default function PostConfession() {
               />
             </div>
 
-            {/* --- VIBE SELECTOR --- */}
             <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-              <label style={{ fontSize: "0.85rem", fontWeight: 700, marginLeft: 10, opacity: 0.9 }}>VIBE</label>
+              <label
+                style={{
+                  fontSize: "0.85rem",
+                  fontWeight: 700,
+                  marginLeft: 10,
+                  opacity: 0.9
+                }}
+              >
+                VIBE
+              </label>
               <select
                 value={mood}
                 disabled={closed || loading}
@@ -223,9 +270,17 @@ export default function PostConfession() {
               </select>
             </div>
 
-            {/* --- CONFESSION TEXTAREA --- */}
             <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-              <label style={{ fontSize: "0.85rem", fontWeight: 700, marginLeft: 10, opacity: 0.9 }}>CONFESSION</label>
+              <label
+                style={{
+                  fontSize: "0.85rem",
+                  fontWeight: 700,
+                  marginLeft: 10,
+                  opacity: 0.9
+                }}
+              >
+                CONFESSION
+              </label>
               <div style={{ position: "relative" }}>
                 <textarea
                   value={message}
@@ -236,13 +291,11 @@ export default function PostConfession() {
                   maxLength={500}
                   style={{
                     ...inputStyle,
-                    borderRadius: 20, // Different radius for text area
+                    borderRadius: 20,
                     resize: "none",
                     lineHeight: 1.5,
                     fontSize: "1rem"
                   }}
-                  onFocus={(e) => !closed && (e.target.style.borderColor = "#ff4d6d")}
-                  onBlur={(e) => (e.target.style.borderColor = "rgba(255,255,255,0.15)")}
                 />
                 <div
                   style={{
@@ -270,17 +323,31 @@ export default function PostConfession() {
                   : message.trim()
                   ? "linear-gradient(90deg, #ff4d6d 0%, #c9184a 100%)"
                   : "rgba(255, 255, 255, 0.1)",
-                color: closed ? "rgba(255,255,255,0.4)" : message.trim() ? "white" : "rgba(255,255,255,0.3)",
+                color: closed
+                  ? "rgba(255,255,255,0.4)"
+                  : message.trim()
+                  ? "white"
+                  : "rgba(255,255,255,0.3)",
                 fontWeight: 800,
                 fontSize: "1rem",
-                boxShadow: closed ? "none" : message.trim() ? "0 4px 15px rgba(255, 77, 109, 0.4)" : "none",
-                cursor: closed ? "not-allowed" : message.trim() ? "pointer" : "not-allowed",
+                boxShadow: closed
+                  ? "none"
+                  : message.trim()
+                  ? "0 4px 15px rgba(255, 77, 109, 0.4)"
+                  : "none",
+                cursor: closed
+                  ? "not-allowed"
+                  : message.trim()
+                  ? "pointer"
+                  : "not-allowed",
                 transition: "all 0.2s"
               }}
-              onMouseDown={(e) => !loading && !closed && message.trim() && (e.target.style.transform = "scale(0.98)")}
-              onMouseUp={(e) => !loading && !closed && message.trim() && (e.target.style.transform = "scale(1)")}
             >
-              {closed ? "Posting Closed 🔒" : loading ? "Sending love... 💌" : "Post Confession 💘"}
+              {closed
+                ? "Posting Closed 🔒"
+                : loading
+                ? "Sending love... 💌"
+                : "Post Confession 💘"}
             </button>
           </form>
         </div>
