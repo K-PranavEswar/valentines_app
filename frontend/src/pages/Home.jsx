@@ -298,11 +298,12 @@ export default function Home() {
       <footer
         style={{
           textAlign: "center",
-          padding: "30px 20px",
-          opacity: 0.5,
+          padding: "18px 12px",
+          opacity: 0.7,
           fontSize: "0.85rem",
-          borderTop: "1px solid rgba(255,255,255,0.05)",
-          marginTop: "20px"
+          borderTop: "1px solid rgba(255,255,255,0.08)",
+          width: "100%",
+          marginTop: "auto"
         }}
       >
         © Confession Site 2026
