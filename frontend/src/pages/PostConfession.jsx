@@ -56,7 +56,7 @@ export default function PostConfession() {
       });
       navigate("/");
     } catch (err) {
-      alert(err?.response?.data?.message || "Posting closed");
+      alert(err?.response?.data?.message || err?.message || "Server error");
     } finally {
       setLoading(false);
     }

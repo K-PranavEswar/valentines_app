@@ -117,7 +117,7 @@ export default function ConfessionCard({ item, onLike, onOpen, isLiked }) {
               </>
             )}
 
-            {toName && fromDept && <span style={{ margin: "0 6px" }}>from</span>}
+            {toName && fromDept && <span style={{ margin: "0 6px" }}>dept: </span>}
 
             {fromDept && <span style={{ color: "#ffccd5", fontWeight: 700 }}>{fromDept}</span>}
           </div>
