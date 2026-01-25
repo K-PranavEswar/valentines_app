@@ -1,15 +1,23 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import jwt from "jsonwebtoken";
 import connectDB from "./config/db.js";
 import confessionRoutes from "./routes/confessionRoutes.js";
+import adminRoutes from "./routes/admin.js";
 
 dotenv.config();
 await connectDB();
 
 const app = express();
-app.use(cors());
+
+app.use(
+  cors({
+    origin: ["http://localhost:5173"],
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
+    credentials: true
+  })
+);
+
 app.use(express.json({ limit: "2mb" }));
 
 app.get("/", (req, res) => {
@@ -17,17 +25,7 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api/confessions", confessionRoutes);
-
-app.post("/api/admin/login", (req, res) => {
-  const { email, password } = req.body;
-
-  if (email !== process.env.ADMIN_EMAIL || password !== process.env.ADMIN_PASSWORD) {
-    return res.status(401).json({ message: "Invalid admin credentials" });
-  }
-
-  const token = jwt.sign({ admin: true }, process.env.JWT_SECRET, { expiresIn: "7d" });
-  res.json({ token });
-});
+app.use("/api/admin", adminRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log("Server running on port " + PORT));

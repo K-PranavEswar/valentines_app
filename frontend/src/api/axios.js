@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "https://valentines-app-ramf.onrender.com"
+  baseURL: "http://localhost:5000"
 });
 
 export default api;

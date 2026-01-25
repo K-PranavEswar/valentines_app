@@ -30,6 +30,10 @@ const moods = ["Secret", "Love", "Crush", "Regret", "Funny"];
 
 export default function PostConfession() {
   const navigate = useNavigate();
+  
+  // Added new state for Name and Department
+  const [name, setName] = useState("");
+  const [department, setDepartment] = useState("");
   const [message, setMessage] = useState("");
   const [mood, setMood] = useState("Secret");
   const [loading, setLoading] = useState(false);
@@ -45,6 +49,8 @@ export default function PostConfession() {
 
     try {
       await api.post("/api/confessions", {
+        name: name.trim(),        // Sending Name
+        department: department.trim(), // Sending Dept
         message: message.trim(),
         mood
       });
@@ -58,6 +64,19 @@ export default function PostConfession() {
 
   const goBack = () => {
     navigate("/");
+  };
+
+  // Common Input Style Object to keep code clean
+  const inputStyle = {
+    width: "100%",
+    padding: "12px 16px",
+    borderRadius: 50,
+    border: "1px solid rgba(255,255,255,0.15)",
+    background: "rgba(0,0,0,0.2)",
+    color: "white",
+    outline: "none",
+    fontFamily: "inherit",
+    fontSize: "0.95rem"
   };
 
   return (
@@ -157,6 +176,34 @@ export default function PostConfession() {
           </div>
 
           <form onSubmit={submit} style={{ display: "grid", gap: 16, opacity: closed ? 0.55 : 1 }}>
+            
+            {/* --- NAME FIELD --- */}
+            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+              <label style={{ fontSize: "0.85rem", fontWeight: 700, marginLeft: 10, opacity: 0.9 }}>NAME (TO)</label>
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                disabled={closed || loading}
+                placeholder="Who is this for?"
+                style={inputStyle}
+              />
+            </div>
+
+            {/* --- DEPARTMENT FIELD --- */}
+            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+              <label style={{ fontSize: "0.85rem", fontWeight: 700, marginLeft: 10, opacity: 0.9 }}>DEPARTMENT</label>
+              <input
+                type="text"
+                value={department}
+                onChange={(e) => setDepartment(e.target.value)}
+                disabled={closed || loading}
+                placeholder="e.g. CSE, Arts, MBA"
+                style={inputStyle}
+              />
+            </div>
+
+            {/* --- VIBE SELECTOR --- */}
             <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
               <label style={{ fontSize: "0.85rem", fontWeight: 700, marginLeft: 10, opacity: 0.9 }}>VIBE</label>
               <select
@@ -164,12 +211,7 @@ export default function PostConfession() {
                 disabled={closed || loading}
                 onChange={(e) => setMood(e.target.value)}
                 style={{
-                  padding: "12px 16px",
-                  borderRadius: 50,
-                  border: "1px solid rgba(255,255,255,0.15)",
-                  background: "rgba(0,0,0,0.2)",
-                  color: "white",
-                  outline: "none",
+                  ...inputStyle,
                   cursor: closed ? "not-allowed" : "pointer"
                 }}
               >
@@ -181,6 +223,7 @@ export default function PostConfession() {
               </select>
             </div>
 
+            {/* --- CONFESSION TEXTAREA --- */}
             <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
               <label style={{ fontSize: "0.85rem", fontWeight: 700, marginLeft: 10, opacity: 0.9 }}>CONFESSION</label>
               <div style={{ position: "relative" }}>
@@ -192,15 +235,9 @@ export default function PostConfession() {
                   rows={6}
                   maxLength={500}
                   style={{
-                    width: "100%",
-                    padding: "16px",
-                    borderRadius: 20,
-                    border: "1px solid rgba(255,255,255,0.15)",
-                    background: "rgba(0,0,0,0.2)",
-                    color: "white",
+                    ...inputStyle,
+                    borderRadius: 20, // Different radius for text area
                     resize: "none",
-                    outline: "none",
-                    fontFamily: "inherit",
                     lineHeight: 1.5,
                     fontSize: "1rem"
                   }}
