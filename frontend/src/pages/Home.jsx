@@ -133,15 +133,16 @@ export default function Home() {
         <section className="glass-panel">
           <h1 className="hero-title">Confession Wall 2026</h1>
           
-          <a 
-            href="https://www.instagram.com/bro__codes._?igsh=MTdkbDJ6b2Y4czVtMw==" 
-            target="_blank" 
-            rel="noopener noreferrer" 
-            className="insta-box"
-          > 
-            <Instagram size={20} strokeWidth={2} />
-            <span style={{ fontWeight: 600 }}>@bro__codes._</span>
-          </a>
+         <a 
+  href="https://www.instagram.com/bro__codes._/" 
+  target="_blank" 
+  rel="noopener noreferrer" 
+  className="insta-box"
+>
+  <Instagram size={20} strokeWidth={2} />
+  <span style={{ fontWeight: 600 }}>@bro__codes._</span>
+</a>
+
 
           <p style={{ opacity: 0.9, fontSize: "1.15rem", lineHeight: "1.6", maxWidth: "450px", margin: "0 auto" }}>
             The vault is open. Speak your heart out anonymously. Your secrets are safe with us.
