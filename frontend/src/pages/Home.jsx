@@ -134,7 +134,7 @@ export default function Home() {
           <h1 className="hero-title">Confession Wall 2026</h1>
           
           <a 
-            href="https://www.instagram.com/bro__codes._" 
+            href="https://www.instagram.com/bro__codes._?igsh=MTdkbDJ6b2Y4czVtMw==" 
             target="_blank" 
             rel="noopener noreferrer" 
             className="insta-box"
