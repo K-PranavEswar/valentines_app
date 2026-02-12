@@ -1,10 +1,10 @@
 import { useEffect, useState, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { 
-  LogOut, Trash2, Instagram, CheckCircle2, 
-  Circle, MousePointerClick, X, Search, 
-  Filter, AlertCircle 
+import {
+  LogOut, Trash2, Instagram, CheckCircle2, Circle,
+  MousePointerClick, X, Search, AlertCircle, Filter, Calendar
 } from "lucide-react";
+
 import Navbar from "../components/Navbar.jsx";
 import ConfessionCard from "../components/ConfessionCard.jsx";
 import ConfessionModal from "../components/ConfessionModal.jsx";
@@ -14,269 +14,273 @@ export default function AdminPanel() {
   const navigate = useNavigate();
   const token = localStorage.getItem("cw2026_admin_token");
 
-  // Data States
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  
-  // UI States
+  const [sortOrder, setSortOrder] = useState("newest"); // 'newest' | 'oldest'
+
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState(null);
+
   const [isSelectMode, setIsSelectMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState([]);
 
-  // --- Logic: Load Data ---
   const load = useCallback(async () => {
     setLoading(true);
     try {
       const res = await api.get("/api/confessions");
-      // Sort newest first
-      const sorted = (res.data || []).sort((a, b) => 
-        new Date(b.createdAt) - new Date(a.createdAt)
-      );
-      setData(sorted);
+      setData(res.data || []);
     } catch (err) {
-      console.error("Failed to load confessions", err);
+      console.error("Fetch error:", err);
     } finally {
       setLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    if (!token) navigate("/admin"); else load();
+    if (!token) navigate("/admin");
+    else load();
   }, [token, navigate, load]);
 
-  // --- Logic: Search Filtering ---
-  const filteredData = useMemo(() => {
-    return data.filter(item => 
+  const filteredAndSortedData = useMemo(() => {
+    let filtered = data.filter(item =>
       item.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       item.message?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       item.department?.toLowerCase().includes(searchTerm.toLowerCase())
     );
-  }, [data, searchTerm]);
 
-  // --- Logic: Selection ---
+    return filtered.sort((a, b) => {
+      const dateA = new Date(a.createdAt);
+      const dateB = new Date(b.createdAt);
+      return sortOrder === "newest" ? dateB - dateA : dateA - dateB;
+    });
+  }, [data, searchTerm, sortOrder]);
+
   const toggleCard = (id) => {
     if (!isSelectMode) {
-      const item = data.find(i => i._id === id);
-      setSelected(item);
+      setSelected(data.find(i => i._id === id));
       setOpen(true);
       return;
     }
-    setSelectedIds(prev => 
+    setSelectedIds(prev =>
       prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
     );
   };
 
-  const handleSelectAll = () => {
-    if (selectedIds.length === filteredData.length) {
-      setSelectedIds([]);
-    } else {
-      setSelectedIds(filteredData.map(item => item._id));
-    }
-  };
-
-  // --- Logic: Delete ---
   const deleteSelected = async () => {
     if (selectedIds.length === 0) return;
-    const confirmMsg = `⚠️ Delete ${selectedIds.length} confession(s) permanently? This cannot be undone.`;
-    if (!window.confirm(confirmMsg)) return;
+    if (!window.confirm(`Permanently delete ${selectedIds.length} confession(s)?`)) return;
 
     setLoading(true);
     try {
-      await Promise.all(selectedIds.map(id => 
-        api.delete(`/api/admin/confessions/${id}`, { 
-          headers: { Authorization: `Bearer ${token}` } 
-        })
-      ));
+      await Promise.all(
+        selectedIds.map(id =>
+          api.delete(`/api/admin/confessions/${id}`, {
+            headers: { Authorization: `Bearer ${token}` }
+          })
+        )
+      );
       setData(prev => prev.filter(item => !selectedIds.includes(item._id)));
       setSelectedIds([]);
       setIsSelectMode(false);
     } catch (err) {
-      alert("Error deleting some items. Please refresh.");
+      alert("Delete failed. Check console for details.");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleLogout = () => {
-    if (window.confirm("Log out of Admin Panel?")) {
-      localStorage.removeItem("cw2026_admin_token");
-      navigate("/admin");
-    }
-  };
-
-  // --- Helper: Render Name/IG ---
-  const renderName = (name) => {
+  const renderNameBadge = (name) => {
     const trimmed = name?.trim() || "Anonymous";
-    if (trimmed.startsWith("@")) {
-      const handle = trimmed.substring(1);
-      return (
-        <a href={`https://instagram.com/${handle}`} target="_blank" rel="noopener noreferrer" className="ig-link" onClick={(e) => e.stopPropagation()}>
-          <Instagram size={14} style={{ marginRight: 4 }} /> {trimmed}
-        </a>
-      );
-    }
-    return <span>To: {trimmed}</span>;
+    const isIG = trimmed.startsWith("@");
+    
+    return (
+      <div className="badge-to">
+        <span style={{ opacity: 0.6 }}>To:</span>
+        {isIG ? (
+          <a
+            href={`https://instagram.com/${trimmed.slice(1)}`}
+            target="_blank"
+            rel="noreferrer"
+            className="ig-link"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <Instagram size={12} /> {trimmed}
+          </a>
+        ) : (
+          <span>{trimmed}</span>
+        )}
+      </div>
+    );
   };
 
   return (
     <div className="admin-wrapper">
       <style>{`
-        .admin-wrapper { 
-          min-height: 100vh; 
-          background: #0d0205; 
-          color: #fff0f3; 
-          font-family: 'Inter', sans-serif;
-          background-image: radial-gradient(circle at 50% -20%, #4a0e1c 0%, #0d0205 80%);
-        }
-        .container { max-width: 1400px; margin: 0 auto; padding: 120px 20px 60px; }
+        .admin-wrapper { min-height: 100vh; background: #0a0a0c; color: #fff; font-family: 'Inter', sans-serif; }
+        .container { max-width: 1400px; margin: auto; padding: 100px 20px 50px; }
         
+        /* Glass Header */
         .admin-header {
-          position: sticky; top: 20px; z-index: 100;
-          background: rgba(20, 5, 10, 0.7); backdrop-filter: blur(25px);
-          border: 1px solid rgba(255, 255, 255, 0.08);
-          border-radius: 30px; padding: 20px 30px;
-          display: flex; flex-direction: column; gap: 20px;
-          box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+          position: sticky; top: 85px; z-index: 50;
+          background: rgba(20, 20, 25, 0.8);
+          backdrop-filter: blur(12px);
+          padding: 24px; border-radius: 24px;
+          border: 1px solid rgba(255,255,255,0.1);
+          box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+          margin-bottom: 40px;
         }
 
-        .header-top { display: flex; justify-content: space-between; align-items: center; }
-        .header-bottom { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
-
-        .search-container {
+        .header-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; }
+        .stats-h2 { font-size: 1.8rem; font-weight: 800; margin: 0; background: linear-gradient(to right, #ff4d6d, #ff8fa3); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        
+        .controls-row { display: flex; gap: 15px; flex-wrap: wrap; align-items: center; }
+        
+        /* Search Input */
+        .search-box {
           position: relative; flex: 1; min-width: 250px;
         }
-        .search-input {
-          width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
-          border-radius: 50px; padding: 12px 20px 12px 45px; color: white; outline: none; transition: 0.3s;
+        .search-box input {
+          width: 100%; background: rgba(255,255,255,0.05);
+          border: 1px solid rgba(255,255,255,0.1);
+          padding: 12px 12px 12px 40px; border-radius: 12px; color: white;
+          outline: none; transition: 0.2s;
         }
-        .search-input:focus { border-color: #ff4d6d; background: rgba(255,255,255,0.08); }
+        .search-box input:focus { border-color: #ff4d6d; background: rgba(255,255,255,0.08); }
+        .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); opacity: 0.5; }
 
-        .action-btn {
-          display: flex; align-items: center; gap: 8px; padding: 12px 22px; border-radius: 50px;
-          font-weight: 700; cursor: pointer; transition: 0.2s; border: 1px solid transparent; font-size: 0.9rem;
+        /* Buttons */
+        .btn {
+          display: flex; align-items: center; gap: 8px;
+          padding: 10px 18px; border-radius: 12px; font-weight: 600;
+          cursor: pointer; border: none; transition: 0.2s;
         }
-        .btn-mode { background: ${isSelectMode ? '#ff4d6d' : 'rgba(255,255,255,0.1)'}; color: white; }
-        .btn-delete { background: #c9184a; color: white; opacity: ${selectedIds.length > 0 ? 1 : 0.4}; pointer-events: ${selectedIds.length > 0 ? 'auto' : 'none'}; border-color: #ff4d6d; }
-        
-        .admin-grid { display: grid; gap: 25px; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); }
-        
-        .card-wrapper { position: relative; transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); cursor: pointer; }
+        .btn-outline { background: transparent; border: 1px solid rgba(255,255,255,0.2); color: white; }
+        .btn-outline:hover { background: rgba(255,255,255,0.1); }
+        .btn-danger { background: #ff4d6d; color: white; }
+        .btn-danger:hover { background: #ff1a45; }
+        .btn-select-active { background: #ff4d6d; border-color: #ff4d6d; }
+
+        .admin-grid {
+          display: grid; gap: 25px;
+          grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        }
+
+        .card-wrapper { position: relative; transition: transform 0.2s; }
         .card-wrapper:hover { transform: translateY(-5px); }
-        .card-selected { transform: scale(0.95); }
-        .card-selected-border { position: absolute; inset: -4px; border: 3px solid #ff4d6d; border-radius: 28px; z-index: 1; pointer-events: none; }
+        .card-selected { border: 3px solid #ff4d6d; border-radius: 24px; }
 
-        .ig-link { color: #ff8fa3; text-decoration: none; font-weight: 800; display: inline-flex; align-items: center; transition: 0.2s; }
-        .ig-link:hover { color: #ff4d6d; text-decoration: underline; }
-
-        .badge-to { 
-          position: absolute; top: 18px; left: 18px; z-index: 10; 
-          background: rgba(0,0,0,0.8); padding: 6px 14px; border-radius: 50px; 
-          font-size: 0.75rem; border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(5px);
+        .badge-to {
+          position: absolute; top: 12px; left: 12px; z-index: 10;
+          background: rgba(0,0,0,0.8); padding: 5px 12px;
+          border-radius: 20px; font-size: 0.7rem; display: flex; gap: 5px; border: 1px solid rgba(255,255,255,0.1);
         }
-        .select-icon { position: absolute; top: 18px; right: 18px; z-index: 10; }
-        
-        .empty-state { text-align: center; padding: 100px 20px; opacity: 0.4; }
+        .ig-link { color: #ff8fa3; text-decoration: none; display: flex; align-items: center; gap: 3px; }
       `}</style>
 
       <Navbar admin />
 
       <div className="container">
-        <header className="admin-header">
+        <div className="admin-header">
           <div className="header-top">
             <div>
-              <h1 style={{ fontSize: "1.6rem", fontWeight: 900, margin: 0 }}>
-                {isSelectMode ? `Selected ${selectedIds.length} items` : "Admin Control"}
-              </h1>
-              <p style={{ margin: 0, opacity: 0.5, fontSize: '0.85rem' }}>
-                {filteredData.length} of {data.length} confessions showing
+              <h2 className="stats-h2">
+                {isSelectMode ? `Selected: ${selectedIds.length}` : "Admin Dashboard"}
+              </h2>
+              <p style={{ opacity: 0.5, fontSize: "0.9rem" }}>
+                Showing {filteredAndSortedData.length} of {data.length} submissions
               </p>
             </div>
-            <button onClick={handleLogout} className="action-btn" style={{ background: 'rgba(255, 77, 109, 0.1)', color: '#ff8fa3' }}>
+            <button className="btn btn-outline" onClick={() => {
+               if(window.confirm("Logout?")) {
+                 localStorage.removeItem("cw2026_admin_token");
+                 navigate("/admin");
+               }
+            }}>
               <LogOut size={18} /> Logout
             </button>
           </div>
 
-          <div className="header-bottom">
-            <div className="search-container">
-              <Search size={18} style={{ position: 'absolute', left: 18, top: '50%', transform: 'translateY(-50%)', opacity: 0.4 }} />
+          <div className="controls-row">
+            <div className="search-box">
+              <Search size={18} className="search-icon" />
               <input 
-                type="text" 
-                placeholder="Search by name, message, or dept..." 
-                className="search-input"
+                placeholder="Search by name, message or dept..." 
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
 
-            <button className="action-btn btn-mode" onClick={() => { setIsSelectMode(!isSelectMode); setSelectedIds([]); }}>
+            <button 
+              className={`btn btn-outline ${isSelectMode ? 'btn-select-active' : ''}`}
+              onClick={() => {
+                setIsSelectMode(!isSelectMode);
+                setSelectedIds([]);
+              }}
+            >
               {isSelectMode ? <X size={18} /> : <MousePointerClick size={18} />}
-              {isSelectMode ? "Cancel Mode" : "Select Cards"}
+              {isSelectMode ? "Cancel" : "Select Multiple"}
             </button>
+
+            <select 
+              className="btn btn-outline"
+              value={sortOrder}
+              onChange={(e) => setSortOrder(e.target.value)}
+              style={{ background: '#1a1a1a' }}
+            >
+              <option value="newest">Newest First</option>
+              <option value="oldest">Oldest First</option>
+            </select>
 
             {isSelectMode && (
               <>
-                <button className="action-btn" onClick={handleSelectAll} style={{ background: 'rgba(255,255,255,0.05)', color: 'white' }}>
-                  {selectedIds.length === filteredData.length ? "Deselect All" : "Select All"}
+                <button className="btn btn-outline" onClick={() => {
+                  setSelectedIds(selectedIds.length === filteredAndSortedData.length ? [] : filteredAndSortedData.map(i => i._id));
+                }}>
+                  {selectedIds.length === filteredAndSortedData.length ? "Deselect All" : "Select All"}
                 </button>
-                <button className="action-btn btn-delete" onClick={deleteSelected}>
-                  <Trash2 size={18} /> Delete Selected
+                <button className="btn btn-danger" onClick={deleteSelected} disabled={selectedIds.length === 0}>
+                  <Trash2 size={18} /> Delete ({selectedIds.length})
                 </button>
               </>
             )}
           </div>
-        </header>
+        </div>
 
-        {loading ? (
-          <div style={{ textAlign: "center", padding: "100px", fontSize: "1.2rem", opacity: 0.6 }}>
-            Syncing Database...
+        {loading && data.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '50px' }}>
+            <div className="spinner">Loading Confessions...</div>
           </div>
-        ) : filteredData.length === 0 ? (
-          <div className="empty-state">
-            <AlertCircle size={48} style={{ marginBottom: 15 }} />
-            <h3>No results matching your search</h3>
+        ) : filteredAndSortedData.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '100px', opacity: 0.5 }}>
+            <AlertCircle size={48} style={{ marginBottom: '10px' }} />
+            <p>No confessions found matching your criteria.</p>
           </div>
         ) : (
           <div className="admin-grid">
-            {filteredData.map((item) => {
-              const isSelected = selectedIds.includes(item._id);
-              return (
-                <div 
-                  key={item._id} 
-                  className={`card-wrapper ${isSelected ? 'card-selected' : ''}`} 
-                  onClick={() => toggleCard(item._id)}
-                >
-                  {isSelected && <div className="card-selected-border" />}
-                  
-                  {isSelectMode && (
-                    <div className="select-icon">
-                      {isSelected 
-                        ? <CheckCircle2 size={26} color="#ff4d6d" fill="white" /> 
-                        : <Circle size={26} color="rgba(255,255,255,0.2)" />
-                      }
-                    </div>
-                  )}
-
-                  <div className="badge-to">{renderName(item.name)}</div>
-                  
-                  <ConfessionCard 
-                    item={item} 
-                    onOpen={() => {}} 
-                    onLike={() => {}} 
-                    isLiked={false} 
-                  />
-                </div>
-              );
-            })}
+            {filteredAndSortedData.map(item => (
+              <div
+                key={item._id}
+                className={`card-wrapper ${selectedIds.includes(item._id) ? 'card-selected' : ''}`}
+                onClick={() => toggleCard(item._id)}
+              >
+                {renderNameBadge(item.name)}
+                <ConfessionCard
+                  item={item}
+                  onOpen={() => {}} 
+                  onLike={() => {}}
+                  isLiked={false}
+                />
+              </div>
+            ))}
           </div>
         )}
       </div>
 
-      <ConfessionModal 
-        open={open} 
-        confession={selected} 
-        onClose={() => setOpen(false)} 
+      <ConfessionModal
+        open={open}
+        confession={selected}
+        onClose={() => setOpen(false)}
       />
     </div>
   );
