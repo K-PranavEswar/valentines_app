@@ -1,319 +1,186 @@
-import { useEffect, useState, useMemo } from "react";
+import { useMemo, useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import { Instagram, Heart, Lock, Send } from "lucide-react"; 
 import Navbar from "../components/Navbar.jsx";
-import ConfessionCard from "../components/ConfessionCard.jsx";
-import ConfessionModal from "../components/ConfessionModal.jsx";
-import api from "../api/axios.js";
 
 const FloatingHearts = () => {
-  const hearts = useMemo(() => Array.from({ length: 12 }), []);
+  // Increased count slightly for better coverage
+  const hearts = useMemo(() => Array.from({ length: 20 }), []);
   return (
-    <div
-      style={{
-        position: "fixed",
-        top: 0,
-        left: 0,
-        width: "100%",
-        height: "100%",
-        overflow: "hidden",
-        zIndex: -1,
-        pointerEvents: "none"
-      }}
-    >
+    <div className="hearts-layer">
       {hearts.map((_, i) => (
         <div
           key={i}
-          className="heart-bg"
+          className="heart-particle"
           style={{
             left: `${Math.random() * 100}vw`,
-            width: `${Math.random() * 20 + 10}px`,
-            height: `${Math.random() * 20 + 10}px`,
-            animationDuration: `${Math.random() * 10 + 15}s`,
-            animationDelay: `${Math.random() * 5}s`,
+            // Random sizes and blur for a depth-of-field effect
+            width: `${Math.random() * 15 + 10}px`,
+            height: `${Math.random() * 15 + 10}px`,
+            animationDuration: `${Math.random() * 8 + 12}s`,
+            animationDelay: `${Math.random() * 10}s`,
             background: i % 2 === 0 ? "#ff4d6d" : "#c9184a",
-            opacity: 0.2
+            filter: `blur(${Math.random() * 2}px)`,
           }}
-        />
+        >
+          <Heart fill="currentColor" size="100%" />
+        </div>
       ))}
     </div>
   );
 };
 
-const moods = [
-  { label: "All Vibes", value: "All" },
-  { label: "❤️ Love", value: "Love" },
-  { label: "😍 Crush", value: "Crush" },
-  { label: "💔 Regret", value: "Regret" },
-  { label: "😂 Funny", value: "Funny" },
-  { label: "🤫 Secret", value: "Secret" }
-];
-
 export default function Home() {
-  const [data, setData] = useState([]);
-  const [mood, setMood] = useState("All");
-  const [search, setSearch] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [open, setOpen] = useState(false);
-  const [selected, setSelected] = useState(null);
-  const [likedIds, setLikedIds] = useState(new Set());
-
-  const closed = new Date() >= new Date("2026-02-15T00:00:00.000Z");
+  const admin = localStorage.getItem("role") === "admin";
+  const closingDate = new Date("2026-02-15T00:00:00.000Z");
+  const [isClosed, setIsClosed] = useState(new Date() >= closingDate);
 
   useEffect(() => {
-    const storedLikes = localStorage.getItem("cw2026_liked_ids");
-    if (storedLikes) {
-      setLikedIds(new Set(JSON.parse(storedLikes)));
-    }
+    const timer = setInterval(() => {
+      if (new Date() >= closingDate) setIsClosed(true);
+    }, 1000);
+    return () => clearInterval(timer);
   }, []);
 
-  useEffect(() => {
-    const fetchConfessions = async () => {
-      setLoading(true);
-      try {
-        const res = await api.get("/api/confessions", {
-          params: { mood, search }
-        });
-        setData(res.data || []);
-      } catch {
-        setData([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    const delayDebounceFn = setTimeout(() => fetchConfessions(), 400);
-    return () => clearTimeout(delayDebounceFn);
-  }, [mood, search]);
-
-  const like = async (id) => {
-    if (likedIds.has(id)) return;
-
-    setData((prev) =>
-      prev.map((item) =>
-        item._id === id ? { ...item, likes: (item.likes || 0) + 1 } : item
-      )
-    );
-
-    const newLikedSet = new Set(likedIds);
-    newLikedSet.add(id);
-    setLikedIds(newLikedSet);
-    localStorage.setItem("cw2026_liked_ids", JSON.stringify([...newLikedSet]));
-
-    try {
-      await api.put(`/api/confessions/${id}/like`);
-    } catch {}
-  };
-
-  const openComments = (item) => {
-    setSelected(item);
-    setOpen(true);
-  };
-
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        backgroundImage: `linear-gradient(rgba(10,0,8,0.75), rgba(40,0,20,0.85)), url("/background.jpg")`,
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        backgroundRepeat: "no-repeat",
-        backgroundAttachment: "fixed",
-        color: "#fff0f3",
-        fontFamily: "'Inter', sans-serif",
-        overflowX: "hidden",
-        display: "flex",
-        flexDirection: "column"
-      }}
-    >
+    <div className="app-container">
+      <style>{`
+        .app-container {
+          min-height: 100vh;
+          background: radial-gradient(circle at top, #2d060e 0%, #0a0103 100%);
+          color: #fff0f3;
+          font-family: 'Inter', system-ui, sans-serif;
+          position: relative;
+          overflow-x: hidden;
+        }
+        .hearts-layer { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
+        .heart-particle { 
+          position: absolute; 
+          bottom: -100px; 
+          opacity: 0.2; 
+          animation: floatUp linear infinite; 
+        }
+        @keyframes floatUp { 
+          0% { transform: translateY(0) rotate(0deg); opacity: 0; }
+          10% { opacity: 0.2; }
+          90% { opacity: 0.2; }
+          100% { transform: translateY(-120vh) rotate(360deg); opacity: 0; } 
+        }
+
+        .main-content {
+          position: relative; z-index: 1;
+          max-width: 1100px; margin: 0 auto; padding: 120px 20px 60px;
+          display: flex; flex-direction: column; align-items: center; justify-content: center;
+          min-height: 90vh;
+        }
+
+        .glass-panel {
+          background: rgba(255, 255, 255, 0.02);
+          backdrop-filter: blur(20px);
+          -webkit-backdrop-filter: blur(20px);
+          border: 1px solid rgba(255, 77, 109, 0.2);
+          border-radius: 40px;
+          padding: 60px 40px;
+          text-align: center;
+          box-shadow: 0 0 40px rgba(255, 77, 109, 0.1);
+          width: 100%; max-width: 650px;
+          transition: transform 0.3s ease;
+        }
+
+        .hero-title {
+          font-size: clamp(2.8rem, 10vw, 4.5rem);
+          font-weight: 900; line-height: 1.1; margin-bottom: 20px;
+          background: linear-gradient(to bottom, #fff 30%, #ff8fa3 100%);
+          -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+
+        .insta-box {
+          display: inline-flex; align-items: center; gap: 8px;
+          background: rgba(255, 255, 255, 0.05);
+          padding: 8px 20px; border-radius: 100px;
+          margin-bottom: 30px; border: 1px solid rgba(255, 255, 255, 0.1);
+          transition: 0.3s; text-decoration: none; color: #ff8fa3;
+        }
+        .insta-box:hover { background: rgba(255, 77, 109, 0.1); transform: translateY(-2px); }
+
+        .btn-post {
+          display: flex; align-items: center; justify-content: center; gap: 10px;
+          background: linear-gradient(135deg, #ff4d6d 0%, #c9184a 100%);
+          color: white; padding: 20px 50px; border-radius: 100px;
+          font-weight: 800; font-size: 1.2rem; text-decoration: none;
+          box-shadow: 0 15px 30px rgba(201, 24, 74, 0.4);
+          transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+          margin: 30px auto 20px; width: fit-content;
+        }
+        .btn-post:hover { transform: scale(1.05) translateY(-5px); }
+
+        .announcement-tag {
+          font-size: 0.75rem; font-weight: 600; letter-spacing: 1px;
+          color: #ff8fa3; text-transform: uppercase; margin-top: 25px;
+          opacity: 0.8; border-top: 1px solid rgba(255, 255, 255, 0.1); padding-top: 20px;
+        }
+
+        @media (max-width: 600px) {
+          .glass-panel { padding: 40px 24px; }
+          .hero-title { font-size: 2.5rem; }
+        }
+      `}</style>
+
       <FloatingHearts />
       <Navbar />
 
-      <div
-        style={{
-          flex: 1,
-          width: "100%",
-          maxWidth: 1200,
-          margin: "0 auto",
-          padding: "clamp(16px, 5vw, 24px)"
-        }}
-      >
-        <div
-          style={{
-            marginBottom: 30,
-            textAlign: "center",
-            padding: "clamp(24px, 5vw, 40px) 20px",
-            borderRadius: 24,
-            background: "rgba(255, 255, 255, 0.05)",
-            backdropFilter: "blur(12px)",
-            border: "1px solid rgba(255, 255, 255, 0.1)",
-            boxShadow: "0 8px 32px rgba(0, 0, 0, 0.2)"
-          }}
-        >
-          <h1
-            style={{
-              fontSize: "clamp(1.8rem, 6vw, 3rem)",
-              fontWeight: 800,
-              background: "linear-gradient(to right, #ff8fa3, #fff0f3)",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-              margin: "0 0 10px 0",
-              lineHeight: 1.2
-            }}
-          >
-            Confession Wall 2026
-          </h1>
+      <main className="main-content">
+        <section className="glass-panel">
+          <h1 className="hero-title">Confession Wall 2026</h1>
+          
+          <a 
+            href="https://www.instagram.com/bro__codes._" 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            className="insta-box"
+          > 
+            <Instagram size={20} strokeWidth={2} />
+            <span style={{ fontWeight: 600 }}>@bro__codes._</span>
+          </a>
 
-          <p
-            style={{
-              fontSize: "clamp(0.95rem, 4vw, 1.1rem)",
-              opacity: 0.8,
-              maxWidth: 650,
-              margin: "0 auto",
-              lineHeight: 1.6
-            }}
-          >
-            Speak your heart out anonymously. <br />
-            Special Edition{" "}
-            <span style={{ color: "#ff4d6d", fontWeight: "bold" }}>
-              14/02/2026
-            </span>{" "}
-            🌹
+          <p style={{ opacity: 0.9, fontSize: "1.15rem", lineHeight: "1.6", maxWidth: "450px", margin: "0 auto" }}>
+            The vault is open. Speak your heart out anonymously. Your secrets are safe with us.
+            <br />
+            <span style={{ color: "#ff8fa3", fontWeight: 700, display: "block", marginTop: "10px" }}>
+              Valentine's Edition 2026 🌹
+            </span>
           </p>
 
-          {closed && (
-            <div
-              style={{
-                marginTop: 18,
-                padding: "12px 16px",
-                borderRadius: 18,
-                background: "rgba(255, 60, 60, 0.16)",
-                border: "1px solid rgba(255, 120, 120, 0.25)",
-                fontWeight: 900,
-                color: "#ffe0e0",
-                display: "inline-block"
-              }}
-            >
-              Confession posting closed after 14/02/2026 🔒
-            </div>
-          )}
-
-          <div
-            style={{
-              marginTop: 30,
-              display: "flex",
-              gap: 12,
-              flexWrap: "wrap",
-              justifyContent: "center"
-            }}
-          >
-            <select
-              value={mood}
-              onChange={(e) => setMood(e.target.value)}
-              style={{
-                padding: "14px 20px",
-                borderRadius: 50,
-                border: "1px solid rgba(255,255,255,0.2)",
-                background: "rgba(0,0,0,0.3)",
-                color: "white",
-                fontSize: 16,
-                cursor: "pointer",
-                outline: "none",
-                flex: "1 1 140px",
-                maxWidth: "100%"
-              }}
-            >
-              {moods.map((m) => (
-                <option
-                  key={m.value}
-                  value={m.value}
-                  style={{ background: "#2a0a18" }}
-                >
-                  {m.label}
-                </option>
-              ))}
-            </select>
-
-            <div
-              style={{
-                position: "relative",
-                flex: "999 1 300px",
-                maxWidth: "100%"
-              }}
-            >
-              <input
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search keywords..."
-                style={{
-                  width: "100%",
-                  padding: "14px 24px",
-                  borderRadius: 50,
-                  border: "1px solid rgba(255,255,255,0.2)",
-                  background: "rgba(255,255,255,0.1)",
-                  color: "white",
-                  fontSize: 16,
-                  outline: "none",
-                  transition: "all 0.2s"
-                }}
-                onFocus={(e) =>
-                  (e.target.style.background = "rgba(255,255,255,0.15)")
-                }
-                onBlur={(e) =>
-                  (e.target.style.background = "rgba(255,255,255,0.1)")
-                }
-              />
-            </div>
+          <div className="actions">
+            {!admin && (
+              isClosed ? (
+                <div className="btn-post" style={{ background: "rgba(255,255,255,0.05)", color: "#777", cursor: "not-allowed", boxShadow: "none", border: "1px solid rgba(255,255,255,0.1)" }}>
+                  <Lock size={20} /> Posting Closed
+                </div>
+              ) : (
+                <Link to="/post" className="btn-post">
+                  <Send size={20} /> Write a Secret
+                </Link>
+              )
+            )}
           </div>
-        </div>
 
-        {loading ? (
-          <div style={{ textAlign: "center", padding: 50, opacity: 0.7 }}>
-            <div className="spinner">💌 Loading hearts...</div>
-          </div>
-        ) : data.length === 0 ? (
-          <div style={{ textAlign: "center", padding: 60, opacity: 0.6 }}>
-            <h3>No confessions found.</h3>
-            <p>Be the first to share a secret!</p>
-          </div>
-        ) : (
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
-              gap: "clamp(12px, 2vw, 20px)"
-            }}
-          >
-            {data.map((item) => (
-              <ConfessionCard
-                key={item._id}
-                item={item}
-                onLike={like}
-                onOpen={openComments}
-                isLiked={likedIds.has(item._id)}
-              />
-            ))}
-          </div>
-        )}
-      </div>
+          <p className="announcement-tag">
+            Results will be featured on <br/><strong>BroCodes Instagram Stories</strong>
+          </p>
+        </section>
+      </main>
 
-      <footer
-        style={{
-          textAlign: "center",
-          padding: "18px 12px",
-          opacity: 0.7,
-          fontSize: "0.85rem",
-          borderTop: "1px solid rgba(255,255,255,0.08)",
-          width: "100%",
-          marginTop: "auto"
-        }}
-      >
-        © Confession Site 2026
-      </footer>
-
-      <ConfessionModal
-        open={open}
-        confession={selected}
-        onClose={() => setOpen(false)}
-      />
+      <footer style={{
+  textAlign: "center",
+  padding: "25px",
+  background: "#0a0a0a",
+  color: "#ffffff",
+  fontSize: "0.85rem",
+  letterSpacing: "1px"
+}}>
+  © 2026 All Rights Reserved <br></br>Developed by <strong>K PRANAV ESWAR</strong><br></br>Presented by <strong>BROCODES 2025-27</strong>
+</footer>
     </div>
   );
 }

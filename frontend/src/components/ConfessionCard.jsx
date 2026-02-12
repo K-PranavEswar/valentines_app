@@ -166,32 +166,6 @@ export default function ConfessionCard({ item, onLike, onOpen, isLiked }) {
         <span style={{ fontSize: "0.85rem", fontWeight: 500, color: "rgba(255,255,255,0.6)" }}>
           {date}
         </span>
-
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            onLike(item._id);
-          }}
-          disabled={isLiked}
-          style={{
-            border: 0,
-            background: "rgba(255,255,255,0.1)",
-            color: isLiked ? "#ff4d6d" : "#fff",
-            padding: "6px 14px",
-            borderRadius: 50,
-            fontSize: "0.9rem",
-            fontWeight: 700,
-            cursor: isLiked ? "default" : "pointer",
-            display: "flex",
-            alignItems: "center",
-            gap: 6,
-            transition: "all 0.2s"
-          }}
-          onMouseDown={(e) => !isLiked && (e.target.style.transform = "scale(0.9)")}
-          onMouseUp={(e) => !isLiked && (e.target.style.transform = "scale(1)")}
-        >
-          {isLiked ? "❤️" : "🤍"} {item.likes || 0}
-        </button>
       </div>
     </div>
   );
