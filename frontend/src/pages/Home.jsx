@@ -133,8 +133,8 @@ export default function Home() {
         <section className="glass-panel">
           <h1 className="hero-title">Confession Wall 2026</h1>
           
-         <a 
-  href="https://www.instagram.com/bro__codes._/" 
+       <a 
+  href="https://www.instagram.com/bro__codes._/?hl=en" 
   target="_blank" 
   rel="noopener noreferrer" 
   className="insta-box"
