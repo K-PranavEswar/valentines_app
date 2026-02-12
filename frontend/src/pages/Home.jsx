@@ -133,15 +133,34 @@ export default function Home() {
         <section className="glass-panel">
           <h1 className="hero-title">Confession Wall 2026</h1>
           
-       <a 
-  href="https://www.instagram.com/bro__codes._/?hl=en" 
-  target="_blank" 
-  rel="noopener noreferrer" 
+       <div
   className="insta-box"
+  onClick={() => {
+    const username = "bro__codes._";
+    const appLink = `instagram://user?username=${username}`;
+    const webLink = `https://www.instagram.com/${username}/`;
+
+    const isAndroid = /Android/i.test(navigator.userAgent);
+    const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+    if (isAndroid || isIOS) {
+      const timeout = setTimeout(() => {
+        window.open(webLink, "_blank");
+      }, 600);
+
+      window.location.href = appLink;
+
+      window.addEventListener("blur", () => clearTimeout(timeout));
+    } else {
+      window.open(webLink, "_blank");
+    }
+  }}
+  style={{ cursor: "pointer" }}
 >
   <Instagram size={20} strokeWidth={2} />
   <span style={{ fontWeight: 600 }}>@bro__codes._</span>
-</a>
+</div>
+
 
 
           <p style={{ opacity: 0.9, fontSize: "1.15rem", lineHeight: "1.6", maxWidth: "450px", margin: "0 auto" }}>
