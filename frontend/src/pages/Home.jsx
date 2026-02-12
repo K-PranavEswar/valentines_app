@@ -199,7 +199,7 @@ export default function Home() {
   fontSize: "0.85rem",
   letterSpacing: "1px"
 }}>
-  © 2026 All Rights Reserved <br></br>Developed by <strong>K PRANAV ESWAR</strong><br></br>Presented by <strong>BROCODES 2025-27</strong>
+  © 2026 All Rights Reserved<br></br>Presented by <strong>BROCODES 2025-27</strong>
 </footer>
     </div>
   );
