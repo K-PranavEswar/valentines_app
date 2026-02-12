@@ -48,6 +48,7 @@ export default function PostConfession() {
   const [mood, setMood] = useState("Secret");
   const [loading, setLoading] = useState(false);
 
+  // Deadline logic
   const closed = new Date() >= new Date("2026-02-15T00:00:00.000Z");
 
   const submit = async (e) => {
@@ -59,7 +60,7 @@ export default function PostConfession() {
 
     try {
       await api.post("/api/confessions", {
-        name: name.trim(),
+        name: name.trim(), // Backend receives the name/handle as is
         department: department.trim(),
         message: message.trim(),
         mood
@@ -85,7 +86,8 @@ export default function PostConfession() {
     color: "white",
     outline: "none",
     fontFamily: "inherit",
-    fontSize: "0.95rem"
+    fontSize: "0.95rem",
+    transition: "all 0.3s ease"
   };
 
   return (
@@ -200,25 +202,50 @@ export default function PostConfession() {
             onSubmit={submit}
             style={{ display: "grid", gap: 16, opacity: closed ? 0.55 : 1 }}
           >
+            {/* NAME / INSTAGRAM FIELD */}
             <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-              <label
-                style={{
-                  fontSize: "0.85rem",
-                  fontWeight: 700,
-                  marginLeft: 10,
-                  opacity: 0.9
-                }}
-              >
-                NAME (TO)
-              </label>
-              <input
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                disabled={closed || loading}
-                placeholder="Who is this for?"
-                style={inputStyle}
-              />
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingRight: 10 }}>
+                <label
+                  style={{
+                    fontSize: "0.85rem",
+                    fontWeight: 700,
+                    marginLeft: 10,
+                    opacity: 0.9
+                  }}
+                >
+                  NAME OR INSTAGRAM ID
+                </label>
+                <span style={{ fontSize: "0.7rem", opacity: 0.5, fontWeight: 600 }}>
+                  Hint: Use @ for Insta
+                </span>
+              </div>
+              <div style={{ position: "relative" }}>
+                <input
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  disabled={closed || loading}
+                  placeholder="Who is this for? (e.g. @john_doe)"
+                  style={{
+                    ...inputStyle,
+                    paddingLeft: name.trim().startsWith('@') ? "42px" : "16px",
+                    borderColor: name.trim().startsWith('@') ? "rgba(255, 77, 109, 0.5)" : "rgba(255,255,255,0.15)",
+                    boxShadow: name.trim().startsWith('@') ? "0 0 10px rgba(255, 77, 109, 0.1)" : "none"
+                  }}
+                />
+                {name.trim().startsWith('@') && (
+                  <span style={{
+                    position: "absolute",
+                    left: "14px",
+                    top: "50%",
+                    transform: "translateY(-50%)",
+                    fontSize: "1.1rem",
+                    pointerEvents: "none"
+                  }}>
+                    📸
+                  </span>
+                )}
+              </div>
             </div>
 
             <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
